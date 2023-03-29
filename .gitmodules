@@ -1,0 +1,3 @@
+[submodule "libs/jsmn-stream"]
+	path = libs/jsmn-stream
+	url = https://github.com/flannelhead/jsmn-stream
