@@ -35,7 +35,7 @@ end_obj(void *user_arg) {
     struct context *ctx = (struct context *) user_arg;
     // use only top level objects
     if (ctx->depth == 1) {
-        js_PublishAsync(ctx->js, subj, (const void *) (ctx->buf + ctx->start), (int) ctx->len, NULL);
+        js_PublishAsync(ctx->js, subj, (const void *) (ctx->buf + ctx->start), (int) (ctx->len - ctx->start), NULL);
 
         if (print) {
             ctx->buf[ctx->len] = '\0';
