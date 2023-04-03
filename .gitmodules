@@ -1,3 +1,6 @@
 [submodule "libs/jsmn-stream"]
 	path = libs/jsmn-stream
 	url = https://github.com/flannelhead/jsmn-stream
+[submodule "libs/cnats"]
+	path = libs/cnats
+	url = https://github.com/nats-io/nats.c

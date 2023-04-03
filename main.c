@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "libs/jsmn-stream/jsmn_stream.h"
-#include "nats/nats.h"
+#include "nats.h"
 
 #define MAX_SERVERS (10)
 
@@ -295,6 +295,7 @@ int
 main(int argc, char **argv) {
     size_t cap = 4096;
     natsStatus s;
+    void * realloc_ptr;
 
     opts = parseArgs(argc, argv);
 
@@ -313,7 +314,13 @@ main(int argc, char **argv) {
         while ((ch = fgetc(stdin)) != EOF) {
             ctx->buf[ctx->len] = (char) ch;
             if (++(ctx->len) == cap) {
-                ctx->buf = realloc(ctx->buf, (cap *= 2) * sizeof(char));
+                realloc_ptr = realloc(ctx->buf, (cap *= 2) * sizeof(char));
+                if (realloc_ptr == NULL) {
+                    printf("Out of memory");
+                    exit(1);
+                } else {
+                    ctx->buf = realloc_ptr;
+                }
             }
             jsmn_stream_parse(&parser, (char) ch);
         }
