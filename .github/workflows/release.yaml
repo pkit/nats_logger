@@ -46,7 +46,6 @@
         - name: Create new tag
           uses: rickstaa/action-create-tag@v1
           with:
-            github_token: ${{ secrets.BUILD_BOT_TOKEN }}
             tag: ${{ steps.tags.outputs.new }}
 
         - name: Generate changelog
@@ -60,7 +59,6 @@
             pullRequests: true
             prWoLabels: true
             onlyLastTag: true
-            token: ${{ secrets.BUILD_BOT_TOKEN }}
             stripGeneratorNotice: true
             output: changelog.md
 
