@@ -1,0 +1,71 @@
+  name: release
+
+  on:
+    push:
+      branches:
+        - main
+        - release-*
+      paths:
+        - VERSION
+    workflow_dispatch:
+      inputs:
+        version:
+          description: Release version (E.g. 0.7.0)
+          required: false
+
+  jobs:
+    create-release:
+      runs-on: ubuntu-20.04
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+          with:
+            fetch-depth: 0
+            submodules: recursive
+
+        - name: Calculate new tag
+          id: tags
+          run: |
+            if [[ -z "${{ github.event.inputs.version }}" ]]; then
+              new=v$(cat VERSION)
+            else
+              new=v${{ github.event.inputs.version }}
+            fi
+            echo "new=$new" | tee -a $GITHUB_OUTPUT
+
+        - name: Bootstrap
+          run: ./.github/bootstrap.sh
+
+        - name: Build .deb package
+          run: |
+            mkdir build
+            cd build
+            cmake ..
+            make package
+
+        - name: Create new tag
+          uses: rickstaa/action-create-tag@v1
+          with:
+            github_token: ${{ secrets.BUILD_BOT_TOKEN }}
+            tag: ${{ steps.tags.outputs.new }}
+
+        - name: Generate changelog
+          id: changelog
+          uses: heinrichreimer/github-changelog-generator-action@v2.3
+          with:
+            compareLink: true
+            issues: true
+            issuesWoLabels: true
+            filterByMilestone: true
+            pullRequests: true
+            prWoLabels: true
+            onlyLastTag: true
+            token: ${{ secrets.BUILD_BOT_TOKEN }}
+            stripGeneratorNotice: true
+            output: changelog.md
+
+        - name: Create release
+          run: |
+            gh release create ${{ steps.tags.outputs.new }} -F changelog.md ./dist/*.deb
+          env:
+            GITHUB_TOKEN: ${{ secrets.BUILD_BOT_TOKEN }}
